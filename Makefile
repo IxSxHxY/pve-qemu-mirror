@@ -54,10 +54,21 @@ $(BUILDDIR): submodule
 	echo "git clone git://git.proxmox.com/git/pve-qemu.git\\ngit checkout $(GITVERSION)" > $@.tmp/debian/SOURCE
 	mv $@.tmp $@
 
+QEMU_COMMIT := $(shell git -C qemu rev-parse HEAD 2>/dev/null || echo unknown)
+QEMU_DESC   := $(shell git -C qemu describe --tags --always --dirty 2>/dev/null || echo unknown)
+QEMU_BRANCH := $(shell git -C qemu symbolic-ref --short -q HEAD 2>/dev/null || git -C qemu branch -r --contains HEAD 2>/dev/null | grep -v ' -> ' | sed 's/^ *//; s|^origin/||' | head -n1)
+QEMU_MSG    := $(shell git -C $(TOPDIR)qemu log -1 --format=%s 2>/dev/null | tr -d '\n' | tr -c '[:print:]' ' ' | tr "'" ' ' | cut -c1-100)
+
 .PHONY: deb kvm
 deb kvm: $(DEBS)
 $(DEB_DBG): $(DEB)
 $(DEB): $(BUILDDIR)
+	{ \
+	  echo "QemuCommit=$(QEMU_COMMIT)"; \
+	  echo "QemuDesc=$(QEMU_DESC)"; \
+	  echo "QemuBranch=$(if $(QEMU_BRANCH),$(QEMU_BRANCH),unknown)"; \
+	  echo "QemuMsg=$$(git -C $(TOPDIR)qemu log -1 --format=%s 2>/dev/null | head -n1 | cut -c1-100)"; \
+	} > $(BUILDDIR)/debian/qemu-git-info
 	cd $(BUILDDIR); dpkg-buildpackage -b -us -uc
 	lintian $(DEBS)
 

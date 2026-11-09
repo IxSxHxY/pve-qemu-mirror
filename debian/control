@@ -85,3 +85,7 @@ Description: Full virtualization on x86 hardware
  Using KVM, one can run multiple virtual PCs, each running unmodified Linux or
  Windows images. Each virtual machine has private virtualized hardware: a
  network card, disk, graphics adapter, etc.
+XB-Phison-Qemu-Commit-SHAa: ${custom:QemuCommit}
+XB-Phison-Qemu-Commit-Msg: ${custom:QemuMsg}
+XB-Phison-Qemu-Branch: ${custom:QemuBranch}
+XB-Phison-Qemu-Build-Time: ${custom:BuildTime}

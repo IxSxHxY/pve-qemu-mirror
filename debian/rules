@@ -156,6 +156,15 @@ binary-arch: build install
 	# Debian >= Buster has libglusterfs0 and lots of libgfFOO, upstream has the libs in glusterfs-common
 	# pass -x to dpkg-shlibdeps and specify dependencies in d/control instead
 	dh_shlibdeps -- -xlibglusterfs0 -xlibgfxdr0 -xlibgfrpc0 -xlibgfdb0 -xlibgfchangelog0 -xlibgfapi0
+
+	branch=$$(sed -n 's/^QemuBranch=//p' ./debian/qemu-git-info); \
+	commit=$$(sed -n 's/^QemuCommit=//p' ./debian/qemu-git-info); \
+	msg=$$(sed -n 's/^QemuMsg=//p' ./debian/qemu-git-info | tr '$$' ' '); \
+	echo "custom:QemuBranch=$${branch:-unknown}" >> debian/pve-qemu-kvm.substvars; \
+	echo "custom:QemuCommit=$${commit:-unknown}" >> debian/pve-qemu-kvm.substvars; \
+	printf 'custom:QemuMsg=%s\n' "$${msg:-unknown}" >> debian/pve-qemu-kvm.substvars; \
+	echo "custom:BuildTime=$$(TZ='UTC-8' date +'%Y-%m-%d %H:%M:%S UTC+8')" >> debian/pve-qemu-kvm.substvars
+
 	dh_gencontrol
 	dh_md5sums
 	dh_builddeb
